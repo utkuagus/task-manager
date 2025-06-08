@@ -3,7 +3,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import viewsets
 from .db_ops import DbOperations
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from rest_framework.decorators import action
+from django.contrib.auth import get_user_model
 
 dbops = DbOperations()
 
@@ -77,3 +82,53 @@ class UserView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        return User.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["post"])
+    def login(self, request):
+        queryset = self.get_queryset()
+        username_or_email = request.data.get("username_or_email")
+        password = request.data.get("password")
+
+        if not username_or_email or not password:
+            return Response(
+                {"detail": "Username/email and password are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = authenticate(request, username=username_or_email, password=password)
+        if user is None:
+            # Try to authenticate by email
+            try:
+                user_obj = get_user_model().objects.get(email=username_or_email)
+                user = authenticate(
+                    request, username=user_obj.username, password=password
+                )
+            except get_user_model().DoesNotExist:
+                user = None
+        if user is not None:
+            tokens = get_tokens_for_user(user)
+            data = UserSerializer(user).data
+            return Response(
+                {
+                    "user": data,
+                    "tokens": tokens,
+                },
+                status=status.HTTP_200_OK,
+            )
+        else:
+            # Invalid credentials
+            return Response(
+                {"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED
+            )

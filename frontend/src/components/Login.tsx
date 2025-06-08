@@ -1,54 +1,72 @@
 import React, { useEffect, useState } from "react";
 import type { ChangeEvent, MouseEvent, FormEvent } from "react";
+import { login } from "../api/UserApi";
+import { type LoginRequest, type LoginResponse } from "../types/ApiDTO";
 
-interface LoginFormData {
-  email: string;
-  password: string;
+interface props {
+  setToken: (token: string) => void;
 }
 
-const Login: React.FC = () => {
-  const [form, setForm] = useState<LoginFormData>({
-    email: "",
+const Login: React.FC<props> = ({ setToken }) => {
+  const [form, setForm] = useState<LoginRequest>({
+    username_or_email: "",
     password: "",
   });
 
+  const [user, setUser] = useState<LoginResponse>();
   const [error, setError] = useState<string>("");
-  const [isSubmitTriggered, setIsSubmitTriggered] = useState<Boolean>(false);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {}, [isSubmitTriggered]);
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+    console.log("User: ", user);
+    setToken(user.tokens.access);
+  }, [user]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     console.log("submit entered");
     setError("");
+    setLoading(true);
 
-    if (!form.email || !form.password) {
+    if (!form.username_or_email || !form.password) {
       setError("Please fill in all fields.");
+      setLoading(false);
       return;
     }
 
     // TODO: handle login logic
     console.log("Logging in with:", form);
+    try {
+      const resp = await login(form);
+      setUser(resp);
+    } catch (err) {
+      setError("Login failed. Please check your credentials.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form className="login-form" onSubmit={handleSubmit}>
+    <form className="login-form flex column gap-10" onSubmit={handleSubmit}>
       <h2>Login</h2>
 
       {error && <p className="error">{error}</p>}
 
       <div className="form-group">
-        <label>Email</label>
+        <label>Email / Username</label>
         <input
-          type="email"
-          name="email"
-          value={form.email}
+          type="text"
+          name="username_or_email"
+          value={form.username_or_email}
           onChange={handleChange}
-          placeholder="Enter your email"
+          placeholder="Enter your email or username"
           required
         />
       </div>
@@ -65,7 +83,9 @@ const Login: React.FC = () => {
         />
       </div>
 
-      <button type="submit">Login</button>
+      <button type="submit" disabled={loading}>
+        {loading ? "Logging in..." : "Login"}
+      </button>
     </form>
   );
 };

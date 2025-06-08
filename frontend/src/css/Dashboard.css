@@ -1,0 +1,17 @@
+.task-row {
+  border: 3px solid #fff;
+  border-collapse: collapse;
+  width: 450px;
+  padding: 6px;
+  margin: 6px;
+}
+
+.task-row > div {
+  flex: 1;
+  min-width: 0;
+  margin: 6px 0;
+}
+
+.task-categories {
+  width: 100%;
+}

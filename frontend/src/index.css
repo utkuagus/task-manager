@@ -57,9 +57,7 @@ button:focus-visible {
 }
 
 form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  width: 200px;
 }
 
 .form-group {
@@ -75,6 +73,28 @@ form {
 
 .form-group > input {
   height: 24px;
+  width: 100%;
+  padding: 0;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex.column {
+  flex-direction: column;
+}
+
+.flex.gap-10 {
+  gap: 10px;
+}
+
+.flex.space-between {
+  justify-content: space-between;
+}
+
+.flex.center-y {
+  align-items: center;
 }
 
 @media (prefers-color-scheme: light) {

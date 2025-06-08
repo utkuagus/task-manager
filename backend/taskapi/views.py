@@ -13,7 +13,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Task.objects.filter(user=user)
+        return Task.objects.filter(user=user).order_by('due_date')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -44,7 +44,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         task.save()
         return Response(self.get_serializer(task).data)
 
-    @action(detail=False, methods=["get"])
+    @action(detail=True, methods=["get"])
     def urgent(self, request):
         today = now().date()
         urgent_threshold = today + timedelta(days=2)
