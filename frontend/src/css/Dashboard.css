@@ -15,3 +15,15 @@
 .task-categories {
   width: 100%;
 }
+
+.tasks {
+  width: 450px;
+  margin: 0 25px;
+}
+
+.dashboard-container {
+  position: fixed;
+  top: 100px;
+  left: 0;
+  width: 100%;
+}

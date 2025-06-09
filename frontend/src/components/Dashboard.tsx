@@ -74,9 +74,9 @@ const Dashboard: React.FC<props> = ({ token }) => {
   };
 
   return (
-    <>
+    <div className="dashboard-container">
       <h2>Dashboard</h2>
-      <div className="task-categories flex space-between">
+      <div className="task-categories flex center-x gap-10">
         {getTaskTable(
           taskList.filter((task) => !task.is_completed),
           "Todo List",
@@ -90,7 +90,7 @@ const Dashboard: React.FC<props> = ({ token }) => {
           handleRevert
         )}
       </div>
-    </>
+    </div>
   );
 };
 

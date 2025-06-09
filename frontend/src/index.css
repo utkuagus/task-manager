@@ -93,6 +93,10 @@ form {
   justify-content: space-between;
 }
 
+.flex.center-x {
+  justify-content: center;
+}
+
 .flex.center-y {
   align-items: center;
 }
