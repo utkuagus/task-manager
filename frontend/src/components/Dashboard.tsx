@@ -15,7 +15,7 @@ const Dashboard: React.FC<props> = ({ token }) => {
   useEffect(() => {
     const get = async () => {
       try {
-        const resp = await getAllTasks(token);
+        const resp = await getAllTasks();
         setTaskList(resp);
       } catch (err) {
         setError("Task list could not be retrieved.");
@@ -33,7 +33,7 @@ const Dashboard: React.FC<props> = ({ token }) => {
 
   const handleComplete = async (id: number) => {
     try {
-      await completeTask(token, id);
+      await completeTask(id);
       setIsUpdatedTrigger((ut) => !ut);
     } catch (err) {
       setError(`Task id = ${id} could not be completed`);
@@ -42,7 +42,7 @@ const Dashboard: React.FC<props> = ({ token }) => {
 
   const handleRevert = async (id: number) => {
     try {
-      await revertTask(token, id);
+      await revertTask(id);
       setIsUpdatedTrigger((ut) => !ut);
     } catch (err) {
       setError(`Task id = ${id} could not be completed`);

@@ -23,6 +23,8 @@ const Login: React.FC<props> = ({ setToken }) => {
     }
     console.log("User: ", user);
     setToken(user.tokens.access);
+    localStorage.setItem("access", user.tokens.access);
+    localStorage.setItem("refresh", user.tokens.refresh);
   }, [user]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {

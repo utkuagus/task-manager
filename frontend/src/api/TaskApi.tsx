@@ -1,18 +1,18 @@
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import type { GetAllTasksResponse } from "../types/ApiDTO";
 import type { Task } from "../types/Models";
+import api from "../config/interceptor";
 
 const URL = "/api/taskapi/";
 
 export const getAllTasks = async (
-  token: String,
   type: string | null = null
 ): Promise<GetAllTasksResponse> => {
   const query_param = type ? "?type=" + type : "";
   try {
-    const response = await axios.get<GetAllTasksResponse>(URL + query_param, {
+    const response = await api.get<GetAllTasksResponse>(URL + query_param, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${localStorage.getItem("access")}`,
       },
     });
     return response.data;
@@ -29,14 +29,11 @@ export const getAllTasks = async (
   }
 };
 
-export const completeTask = async (
-  token: String,
-  id: number | null = null
-): Promise<Task> => {
+export const completeTask = async (id: number | null = null): Promise<Task> => {
   try {
-    const response = await axios.put<Task>(URL + id + "/complete/", null, {
+    const response = await api.put<Task>(URL + id + "/complete/", null, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${localStorage.getItem("access")}`,
       },
     });
     return response.data;
@@ -53,14 +50,11 @@ export const completeTask = async (
   }
 };
 
-export const revertTask = async (
-  token: String,
-  id: number | null = null
-): Promise<Task> => {
+export const revertTask = async (id: number | null = null): Promise<Task> => {
   try {
-    const response = await axios.put<Task>(URL + id + "/todo/", null, {
+    const response = await api.put<Task>(URL + id + "/todo/", null, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${localStorage.getItem("access")}`,
       },
     });
     return response.data;
