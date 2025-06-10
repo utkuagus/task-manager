@@ -14,6 +14,7 @@
 
 .task-categories {
   width: 100%;
+  gap: 70px;
 }
 
 .tasks {
@@ -24,6 +25,27 @@
 .dashboard-container {
   position: fixed;
   top: 100px;
+  bottom: 0;
   left: 0;
+  right: 0;
   width: 100%;
+  overflow-y: auto;
+}
+
+@media (max-width: 900px) {
+  .task-categories {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .task-table {
+    width: 100%;
+    max-width: 600px;
+  }
+
+  .task-categories,
+  .tasks,
+  .task-row {
+    width: 100%;
+  }
 }

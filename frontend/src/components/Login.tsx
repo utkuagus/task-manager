@@ -56,13 +56,15 @@ const Login: React.FC<props> = ({ setToken }) => {
   };
 
   return (
-    <form className="login-form flex column gap-10" onSubmit={handleSubmit}>
+    <form className="login-form flex column" onSubmit={handleSubmit}>
       <h2>Login</h2>
 
       {error && <p className="error">{error}</p>}
 
       <div className="form-group">
-        <label>Email / Username</label>
+        <label>
+          <div>Email /</div> <div>Username</div>
+        </label>
         <input
           type="text"
           name="username_or_email"

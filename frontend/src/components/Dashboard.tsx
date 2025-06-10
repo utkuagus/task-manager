@@ -58,7 +58,7 @@ const Dashboard: React.FC<props> = ({ token }) => {
     handleFunc: (id: number) => void
   ) => {
     return (
-      <div className="flex column">
+      <div className="task-table flex column center-y">
         <h3>{title}</h3>
         <div className="tasks flex column gap-10">
           {taskList.map((task) => (
@@ -76,7 +76,7 @@ const Dashboard: React.FC<props> = ({ token }) => {
   return (
     <div className="dashboard-container">
       <h2>Dashboard</h2>
-      <div className="task-categories flex center-x gap-10">
+      <div className="task-categories flex center-x">
         {getTaskTable(
           taskList.filter((task) => !task.is_completed),
           "Todo List",
