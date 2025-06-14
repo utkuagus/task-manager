@@ -3,6 +3,7 @@ import {
   completeTask,
   revertTask,
   getAllTasks,
+  getUrgencyTasks,
   updateTask,
 } from "../api/TaskApi";
 import type { GetAllTasksResponse } from "../types/ApiDTO";
@@ -16,31 +17,49 @@ interface props {
 const Dashboard: React.FC<props> = ({ token }) => {
   const [isUpdatedTrigger, setIsUpdatedTrigger] = useState<boolean>(false);
   const [updatingRowId, setUpdatingRowId] = useState<number | null>(null);
-  const [isUpdatingTableCompleted, setIsUpdatingTableCompleted] =
-    useState<boolean>(false);
+  const [updatingTableName, setUpdatingTableName] = useState<string | null>(
+    null
+  );
   const [tempTask, setTempTask] = useState<Task | null>(null);
 
   const [todoList, setTodoList] = useState<GetAllTasksResponse>([]);
   const [completedList, setCompletedList] = useState<GetAllTasksResponse>([]);
+  const [urgencyList, setUrgencyList] = useState<GetAllTasksResponse>([]);
 
   const taskList: Record<string, Task[]> = {
-    false: todoList,
-    true: completedList,
+    todo: todoList,
+    completed: completedList,
+    urgent: urgencyList,
   };
 
+  const titleRef = useRef<HTMLInputElement>(null);
   const dueDateRef = useRef<HTMLInputElement>(null);
   const updateButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
+    let allTasks: GetAllTasksResponse, urgencyTasks: GetAllTasksResponse;
     const get = async () => {
       try {
-        const resp = await getAllTasks();
-        setTodoList(resp.filter((task) => !task.is_completed));
-        setCompletedList(resp.filter((task) => task.is_completed));
-        setUpdatingRowId(null);
+        allTasks = await getAllTasks();
       } catch (err) {
         console.log("Task list could not be retrieved.");
       }
+      try {
+        urgencyTasks = await getUrgencyTasks();
+      } catch (err) {
+        console.log("Urgency task list could not be retrieved.");
+      }
+
+      setTodoList(
+        allTasks.filter(
+          (task) =>
+            !task.is_completed &&
+            !urgencyTasks.map((t) => t.id).includes(task.id)
+        )
+      );
+      setCompletedList(allTasks.filter((task) => task.is_completed));
+      setUrgencyList(urgencyTasks);
+      setUpdatingRowId(null);
     };
 
     console.log("token: ", token);
@@ -54,6 +73,9 @@ const Dashboard: React.FC<props> = ({ token }) => {
 
   useEffect(() => {
     setTempTask(null);
+    if (updatingRowId != null) {
+      titleRef.current?.focus();
+    }
   }, [updatingRowId]);
 
   const handleComplete = async (id: number) => {
@@ -84,7 +106,7 @@ const Dashboard: React.FC<props> = ({ token }) => {
     };
     const origTask = tempTask
       ? tempTask
-      : taskList[isUpdatingTableCompleted.toString()][updatingRowId!];
+      : taskList[updatingTableName!][updatingRowId!];
     setTempTask({ ...origTask, ...task });
   };
 
@@ -118,11 +140,11 @@ const Dashboard: React.FC<props> = ({ token }) => {
     title: string,
     buttonName: string,
     handleFunc: (id: number) => void,
-    isCompleted: boolean
+    tableName: string
   ) => {
     return (
       <div className="task-table flex column center-y">
-        <h3>{title}</h3>
+        <h3 style={tableName === "urgent" ? { color: "red" } : {}}>{title}</h3>
         <div className="tasks flex column gap-10">
           {taskList.map((task, idx) => (
             <div
@@ -130,14 +152,14 @@ const Dashboard: React.FC<props> = ({ token }) => {
               key={task.id}
               onClick={() => {
                 setUpdatingRowId(idx);
-                setIsUpdatingTableCompleted(isCompleted);
+                setUpdatingTableName(tableName);
               }}
             >
-              {updatingRowId == idx &&
-              isUpdatingTableCompleted == isCompleted ? (
+              {updatingRowId == idx && updatingTableName == tableName ? (
                 <>
                   <input
                     className="title"
+                    ref={titleRef}
                     value={tempTask ? tempTask.title : task.title}
                     onChange={(e) => handleInputChange(e, "title")}
                     onKeyDown={handleTitleEnter}
@@ -185,13 +207,26 @@ const Dashboard: React.FC<props> = ({ token }) => {
     <div className="dashboard-container">
       <h2>Dashboard</h2>
       <div className="task-categories flex center-x">
-        {getTaskTable(todoList, "Todo List", "complete", handleComplete, false)}
+        {getTaskTable(
+          todoList,
+          "Todo List",
+          "complete",
+          handleComplete,
+          "todo"
+        )}
         {getTaskTable(
           completedList,
           "Completed List",
           "revert",
           handleRevert,
-          true
+          "completed"
+        )}
+        {getTaskTable(
+          urgencyList,
+          "Urgent List",
+          "complete",
+          handleComplete,
+          "urgent"
         )}
       </div>
     </div>

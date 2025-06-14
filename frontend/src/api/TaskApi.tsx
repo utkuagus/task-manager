@@ -29,6 +29,27 @@ export const getAllTasks = async (
   }
 };
 
+export const getUrgencyTasks = async (): Promise<GetAllTasksResponse> => {
+  try {
+    const response = await api.get<GetAllTasksResponse>(URL + "urgent/", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    const err = error as AxiosError;
+    if (err.response) {
+      console.error("Login failed:", err.response.data);
+    } else if (err.request) {
+      console.error("No response from server:", err.request);
+    } else {
+      console.error("Error setting up login request:", err.message);
+    }
+    throw err;
+  }
+};
+
 export const completeTask = async (id: number | null = null): Promise<Task> => {
   try {
     const response = await api.put<Task>(URL + id + "/complete/", null, {
